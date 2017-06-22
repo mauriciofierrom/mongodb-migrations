@@ -63,7 +63,7 @@ class Migrator
     if direction == 'down'
       m = _(@_m)
         .reverse()
-        .filter (m) => (_r = @_result[m.id]?.status) and _r != 'skip'
+        # .filter (m) => (_r = @_result[m.id]?.status) and _r != 'skip'
         .value()
     else
       direction = 'up'
@@ -128,9 +128,9 @@ class Migrator
       if direction == 'up' and id of @_ranMigrations
         skipReason = "migration already ran"
         skipCode = 'already_ran'
-      if direction == 'down' and id not of @_result
-        skipReason = "migration wasn't in the recent `migrate` run"
-        skipCode = 'not_in_recent_migrate'
+      # if direction == 'down' and id not of @_result
+      #   skipReason = "migration wasn't in the recent `migrate` run"
+      #   skipCode = 'not_in_recent_migrate'
       if skipReason
         migrationDone status: 'skip', reason: skipReason, code: skipCode
         return runOne()
@@ -158,13 +158,13 @@ class Migrator
 
     runOne()
 
-  migrate: (done, progress) ->
-    @_runWhenReady 'up', done, progress
+  migrate: (direction, done, progress) ->
+    @_runWhenReady direction, done, progress
     return
 
   rollback: (done, progress) ->
-    if @_lastDirection != 'up'
-      return done new Error('Rollback can only be ran after migrate')
+    # if @_lastDirection != 'up'
+    #   return done new Error('Rollback can only be ran after migrate')
     @_runWhenReady 'down', done, progress
     return
 
@@ -194,12 +194,12 @@ class Migrator
             return { number: f.number, module: require(fileName) }
         cb null, files
 
-  runFromDir: (dir, done, progress) ->
+  runFromDir: (dir, direction, done, progress) ->
     @_loadMigrationFiles dir, (err, files) =>
       if err
         return done err
       @bulkAdd _.map(files, 'module')
-      @migrate done, progress
+      @migrate direction, done, progress
 
   create: (dir, id, done, coffeeScript=false) ->
     @_loadMigrationFiles dir, (err, files) ->

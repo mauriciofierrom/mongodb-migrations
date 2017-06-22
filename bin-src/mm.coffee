@@ -49,7 +49,11 @@ createMigrator = ->
 
 runMigrations = (opts) ->
   readConfig opts.config
-  createMigrator().runFromDir cwd(), exit
+  createMigrator().runFromDir cwd(), 'up', exit
+
+rollback = (opts) ->
+  readConfig opts.config
+  createMigrator().runFromDir cwd(), 'down', exit
 
 createMigration = (opts) ->
   readConfig opts.config
@@ -111,6 +115,10 @@ optparser
 optparser
   .command 'migrate'
   .callback runMigrations
+
+optparser
+  .command 'rollback'
+  .callback rollback
 
 optparser
   .nocommand()
